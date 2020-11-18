@@ -30,7 +30,7 @@ class SelfDriver(object):
         vel.x = data[0]
         angle = Vector3()
         angle.y = data[1]
-        if angle.y > 3.1 and angle.y < 6.1:
+        if angle.y >= 3 and angle.y <= 6:
             self.pub_pos.publish(angle)
         self.pub_vel.publish(vel)
 
@@ -43,10 +43,10 @@ class ContrlMode():
         self.mes = [0,0]
         
     def keys_input(self,data):
-        vel = 100 * data.axes[1]
+        vel = 200 * data.axes[1]
         
         pos = data.axes[3]  
-        pos = (pos +2) *2.25 
+        pos = (pos +2) * 2.25 
         self.mes[0] = vel
         self.mes[1] = pos
         print(self.mes[1])
