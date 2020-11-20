@@ -17,3 +17,5 @@ roslaunch hls_lfcd_lds_driver view_hlds_laser.launch
 
 
 base_local_planner
+
+rosrun gmapping slam_gmapping scan:=scan _base_frame:=base_link _odom_frame:=odom
