@@ -19,3 +19,21 @@ roslaunch hls_lfcd_lds_driver view_hlds_laser.launch
 base_local_planner
 
 rosrun gmapping slam_gmapping scan:=scan _base_frame:=base_link _odom_frame:=odom
+
+
+	<joint name="ang_base" type="fixed">
+		<parent link="base_link"/>
+		<child link="car"/>
+		
+		<origin rpy = "0 0 0" xyz="0 0 0" />
+	</joint>
+	<link name="car">
+		<visual>
+			<origin rpy="1.57 0 -1.57" xyz="0 0 0"/>
+			<geometry>
+				<mesh filename="package://auto_car/urdf/car.stl" scale="0.01 0.01 0.01"/>
+			</geometry>
+			
+		</visual>
+	</link>
+	
