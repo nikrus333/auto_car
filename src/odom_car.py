@@ -13,47 +13,52 @@ import numpy as np
 
 
 class OdomCar():
-
     def __init__(self):
         rospy.init_node('odom_car', anonymous=True)
-        self.sub_odom_car = rospy.Subscriber("/camera_motors_position",JointState,self.odom_cam)
-        self.odom_pub = rospy.Publisher("odom",Odometry,queue_size=10)
+        self.sub_odom_car = rospy.Subscriber("/camera_motors_position",
+                                                JointState, self.odom_cam)
+        self.odom_pub = rospy.Publisher("odom", Odometry, queue_size=10)
         self.odom_broadcaster = tf.TransformBroadcaster()
         self.odom_broadcaster_laser = tf.TransformBroadcaster()
-
         self.odom = Odometry()
-        #parametrs auto_car metr 
-        scale = 1 
+
+        # parametrs auto_car metr
+        scale = 1
         self.pi = math.pi
-        self.len_base_car = 0.17 * scale# lenght auto_car
+        self.len_base_car = 0.17 * scale  # lenght auto_car
         self.len_mass_c = 0.08 * scale
-        self.diametr_whell = 0.065 * scale
-        
+        self.radius_whell = 0.0325 * scale
+        self.len_laser = 0.091 * scale
         self.x = 0
         self.y = 0
-        self.th = 0 
+        self.th = 0
         self.vx = 0
         self.vy = 0
         self.vth = 0
         self.current_time = rospy.Time.now()
         self.last_time = rospy.Time.now()
-        self.r = rospy.Rate(10)
-        self.pos = [0,0]
-        self.vel = [0,0]
+        self.r = rospy.Rate(50)
+        self.pos = [0, 0]
+        self.vel = [0, 0]
         
 
     def odom_cam(self,data):  
         self.pos[0] = data.position[0]
-        self.pos[1] =  0 #data.position[1]
+        self.pos[1] = 0 # (data.position[1])
+        print(data.position[1] - 3.14159265359)
 
-        #arduino car
+        # arduino car
         n1 = 10
         n2 = 24
-        k  =  (n2 / n1) * self.pi * self.diametr_whell  /60
-        self.vel[0] = data.velocity[0] * k # m/min
+        if data.velocity[0] > 300 or data.velocity[0] < -300 :
+           data.velocity = [0,0]
+        w1 = 2 * math.pi *  data.velocity[0] * 0.229 / 60
+        w2 = w1 * n1 / n2
+        self.vel[0] = self.radius_whell * w2   # m/sec
+        # print(data.velocity[0])
         self.vel[1] = data.velocity[1]
-        
 
+        
     def odome_car(self):
         self.current_time = rospy.Time.now()
         dt = (self.current_time - self.last_time).to_sec()
@@ -68,29 +73,16 @@ class OdomCar():
         delta_y = L * math.sin(alfa) 
         self.x += delta_x
         self.y += delta_y
-        
-        self.x += delta_x
-        self.y += delta_y
         self.th += delta_th
 
-
-
-
-        '''
-        delta_x = (self.vel[0]  *  math.sin(self.pos[1]) * dt) /10
-        delta_y = (self.vel[0] * math.cos(self.pos[1])) * dt / 10
-        self.x += delta_x
-        self.y += delta_y
-        self.th = self.pos[1]
-        #self.th = 0.5
-        '''
-        #print('vel[0]',self.vel[0])
-        #print('pos[1]',pos[1])
-        len_laser = 0.13
-        odom_quat = tf.transformations.quaternion_from_euler(0,0,self.th)
-        odom_quat1 = tf.transformations.quaternion_from_euler(0,0,0)
-        self.odom_broadcaster.sendTransform((self.x, self.y ,0.),odom_quat,self.current_time,"base_link","odom")
-        self.odom_broadcaster_laser.sendTransform((0,0,len_laser), odom_quat1,self.current_time,"laser","base_link")
+        odom_quat = tf.transformations.quaternion_from_euler(0, 0, self.th)
+        odom_quat1 = tf.transformations.quaternion_from_euler(0, 0, 0)
+        self.odom_broadcaster.sendTransform((self.x, self.y, 0.), 
+                                            odom_quat, self.current_time,
+                                            "base_link","odom")
+        self.odom_broadcaster_laser.sendTransform((0, 0, self.len_laser), 
+                                                    odom_quat1, self.current_time, 
+                                                    "laser","base_link")
         self.odom = Odometry()
         self.odom.header.stamp = self.current_time
         self.odom.header.frame_id = "odom"
@@ -103,22 +95,15 @@ class OdomCar():
 
 
     def rul_rul(self, data): #solution angle whell 
-        def __init__(self):
-            x_base = 0
-            y_base = 0
-            z_base = 0
-            x_wh = 0.024
-            y_wh = 0.064
-            z_wh = 0.01
-            np.base_vector = ([0,math.sin(self.pos[1]), math.cos(self.pos[1])]) # to do tf
-            np.dot_second_sfera = ([0,L,0])
+        x_base = 0
+        y_base = 0
+        z_base = 0
+        x_wh = 0.024
+        y_wh = 0.064
+        z_wh = 0.01
+        np.base_vector = ([0,math.sin(self.pos[1]), math.cos(self.pos[1])]) # to do tf
+        np.dot_second_sfera = ([0, L, 0])
 
-
-
-
-
-
-        
 
 if __name__ == "__main__":
     car = OdomCar()

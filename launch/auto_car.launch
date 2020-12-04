@@ -1,5 +1,5 @@
 <launch>
-<node pkg="auto_car" type="odom_car.py" name = "odom_car" />
+
 <arg name="model" default="$(find auto_car)/urdf/auto_car.urdf"/>
 <param name="robot_description" command="$(find xacro)/xacro --inorder $(arg model)" />
 
@@ -12,4 +12,5 @@
 <node pkg="joy" type="joy_node" name = "joy_node"/>
 <node type="rviz" name="rviz" pkg="rviz" args="-d $(find auto_car)/rviz/config_file.rviz" />
 <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher"/>
+
 </launch>

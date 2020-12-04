@@ -53,13 +53,14 @@ class ContrlMode():
         pos = (pos +2) * 2.25 
         self.mes[0] = vel
         self.mes[1] = pos
-        #print(self.mes[1])
+
+        print(self.mes[1])
         return self.mes  
 
 class Contrl():
     def __init__(self):
         self.sub_j = rospy.Subscriber("cmd_vel",Twist,self.car)
-        self.mes = [0,0]
+        self.mes = [265,0]
         
     def car(self,data):
         pose = data
@@ -78,7 +79,7 @@ if __name__ == "__main__":
     print("select contrl mod")
     print("1 - joy")
     print("2 - auto")
-    input_1 = input()
+    input_1 ='1' # input()
     if input_1 == '1':
         mod = ContrlMode()
     elif input_1 == '2':
