@@ -29,6 +29,8 @@ class OdomCar():
         self.len_mass_c = 0.08 * scale
         self.radius_whell = 0.0325 * scale
         self.len_laser = 0.091 * scale
+        self.len_tyaga = 0.059 
+        self.len_r_flan = 0.008
         self.x = 0
         self.y = 0
         self.th = 0
@@ -45,7 +47,7 @@ class OdomCar():
     def odom_cam(self,data):  
         self.pos[0] = data.position[0]
         self.pos[1] = 0 # (data.position[1])
-        print(data.position[1] - 3.14159265359)
+        #print(data.position[1] - 3.14159265359)
 
         # arduino car
         n1 = 10
@@ -86,7 +88,7 @@ class OdomCar():
         self.odom = Odometry()
         self.odom.header.stamp = self.current_time
         self.odom.header.frame_id = "odom"
-        self.odom.pose.pose = Pose(Point(self.x, self.y, 0.), Quaternion(*odom_quat))
+        self.odom.pose.pose = Pose(Point(self.x, self.y, 0), Quaternion(*odom_quat))
         self.odom.child_frame_id = "base_link"
         self.odom.twist.twist = Twist(Vector3(self.vx, self.vy, 0), Vector3(0, 0, self.vth))
         self.odom_pub.publish(self.odom)
@@ -94,16 +96,13 @@ class OdomCar():
         self.r.sleep()
 
 
-    def rul_rul(self, data): #solution angle whell 
-        x_base = 0
-        y_base = 0
-        z_base = 0
-        x_wh = 0.024
-        y_wh = 0.064
-        z_wh = 0.01
-        np.base_vector = ([0,math.sin(self.pos[1]), math.cos(self.pos[1])]) # to do tf
-        np.dot_second_sfera = ([0, L, 0])
-
+    def angle_rul(self): #solution angle whell 
+        angle_alfa = self.pos[1] - 1.57
+        if angle_alfa < 0:
+            angle_alfa *= -1
+        delta_x = math.sqrt(self.len_tyaga**2 - (self.len_r_flan * math.sin(angle_alfa))**2) + math.cos(angle_alfa) * self.len_r_flan
+        return delta_x
+        
 
 if __name__ == "__main__":
     car = OdomCar()
@@ -111,6 +110,7 @@ if __name__ == "__main__":
     while not rospy.is_shutdown():
         try:
             car.odome_car()
+            print(car.angle_rul())
             if stored_exception:
                 print('game over')
                 break
