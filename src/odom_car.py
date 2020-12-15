@@ -10,6 +10,8 @@ from geometry_msgs.msg import Point, Pose, Quaternion, Twist, Vector3
 from sensor_msgs.msg import JointState
 import math
 import numpy as np
+import json
+import os.path
 
 
 class OdomCar():
@@ -21,9 +23,9 @@ class OdomCar():
         self.odom_broadcaster = tf.TransformBroadcaster()
         self.odom_broadcaster_laser = tf.TransformBroadcaster()
         self.odom = Odometry()
-
         # parametrs auto_car metr
         scale = 1
+        self.pi = math.pi
         self.pi = math.pi
         self.len_base_car = 0.17 * scale  # lenght auto_car
         self.len_mass_c = 0.08 * scale
@@ -42,11 +44,14 @@ class OdomCar():
         self.r = rospy.Rate(50)
         self.pos = [0, 0]
         self.vel = [0, 0]
+        self.angle_whell = []
+
+        
         
 
     def odom_cam(self,data):  
         self.pos[0] = data.position[0]
-        self.pos[1] = 0 # (data.position[1])
+        self.pos[1] = data.position[1]
         #print(data.position[1] - 3.14159265359)
 
         # arduino car
@@ -62,17 +67,31 @@ class OdomCar():
 
         
     def odome_car(self):
+        flag_wheel_direction = True 
         self.current_time = rospy.Time.now()
         dt = (self.current_time - self.last_time).to_sec()
         L = self.vel[0] * dt
-        alfa = self.pos[1]
-        if alfa !=0: 
-            R = math.sqrt(self.len_mass_c**2 + (1 / math.tan(alfa))**2 * self.len_mass_c**2)
+        alfa = 0
+        if self.pos[1] != 0:
+            alfa = (self.pos[1] - 1.5 * self.pi) * 180 / self.pi
+        #eto nado ybrat a to zackvar   
+        if alfa < 0:
+            alfa = 180 + alfa
+            if alfa < 91:
+                alfa = 91
+        if alfa > 180:
+            alfa = 180
+        print('alfa', alfa)
+        tetta = (self.angle_whell[int(alfa)][0] - self.angle_whell[int(alfa)][1]) / 2 
+        tetta = tetta * self.pi / 180
+        print('tetta', tetta)
+        if tetta !=0: 
+            R = math.sqrt(self.len_mass_c**2 + (1 / math.tan(tetta))**2 * self.len_mass_c**2)
             delta_th = L / R
         else:
             delta_th = 0
-        delta_x = L * math.cos(alfa)
-        delta_y = L * math.sin(alfa) 
+        delta_x = L * math.cos(tetta)
+        delta_y = L * math.sin(tetta) 
         self.x += delta_x
         self.y += delta_y
         self.th += delta_th
@@ -97,20 +116,28 @@ class OdomCar():
 
 
     def angle_rul(self): #solution angle whell 
-        angle_alfa = self.pos[1] - 1.57
-        if angle_alfa < 0:
-            angle_alfa *= -1
-        delta_x = math.sqrt(self.len_tyaga**2 - (self.len_r_flan * math.sin(angle_alfa))**2) + math.cos(angle_alfa) * self.len_r_flan
-        return delta_x
+        try:  # load data angle
+            path = '/home/nik/catkin_ws/src/auto_car/src/test.json'
+            with open(path, 'r', encoding='utf-8') as f:
+                data_j = json.load(f)
+                for i in range(360):
+                    if i <= 90:
+                        self.angle_whell.append(data_j[i]['%d' % i])  
+                    if i >= 270 and i < 360:
+                        self.angle_whell.append(data_j[i]['%d' % i])         
+            
+        except:
+            print('does not open file')
+      
         
 
 if __name__ == "__main__":
     car = OdomCar()
+    car.angle_rul()
     stored_exception=None
     while not rospy.is_shutdown():
         try:
             car.odome_car()
-            print(car.angle_rul())
             if stored_exception:
                 print('game over')
                 break

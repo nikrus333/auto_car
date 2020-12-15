@@ -4,17 +4,13 @@
 import os
 import rospy
 import time
-
+import cv2
 from std_msgs.msg import String
 from sensor_msgs.msg import Joy
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Point
 from geometry_msgs.msg import Vector3
 from geometry_msgs.msg import Twist
-import cv2
-
-
-
 
 class SelfDriver(object):
    
@@ -23,9 +19,6 @@ class SelfDriver(object):
         rospy.init_node('auto_driver', anonymous=True)
         self.pub_vel = rospy.Publisher('/target_velocity', Vector3, queue_size=1)
         self.pub_pos = rospy.Publisher('/target_angles', Vector3, queue_size=1)
-        #self.pub = rospy.Publisher('cmd',Point, guee_size = 1)
-        #to do video
-        #cap = cv2.VideoCapture(0)
 
     def pub(self, data = [0, 4]): # to do rename 
         vel = Vector3()
@@ -65,10 +58,6 @@ class ContrlAuto():
         self.mes[0] = vel
         #print(self.mes[1])
         return self.mes  
-
-
-
-
 
 
 if __name__ == "__main__":
