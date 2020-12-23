@@ -31,8 +31,8 @@ class OdomCar():
         self.len_mass_c = 0.08 * scale
         self.radius_whell = 0.0325 * scale
         self.len_laser = 0.091 * scale
-        self.len_tyaga = 0.059 
-        self.len_r_flan = 0.008
+        self.len_tyaga = 0.059 * scale
+        self.len_r_flan = 0.008 * scale
         self.x = 0
         self.y = 0
         self.th = 0
@@ -73,25 +73,23 @@ class OdomCar():
         L = self.vel[0] * dt
         alfa = 0
         if self.pos[1] != 0:
-            alfa = (self.pos[1] - 1.5 * self.pi) * 180 / self.pi
-        #eto nado ybrat a to zackvar   
+            alfa = (self.pos[1] - 1 * self.pi) * 180 / self.pi
         if alfa < 0:
-            alfa = 180 + alfa
-            if alfa < 91:
-                alfa = 91
-        if alfa > 180:
-            alfa = 180
+            alfa = 0
         print('alfa', alfa)
         tetta = (self.angle_whell[int(alfa)][0] - self.angle_whell[int(alfa)][1]) / 2 
-        tetta = tetta * self.pi / 180
         print('tetta', tetta)
+        tetta = tetta * self.pi / 180 * -1
+        #
         if tetta !=0: 
-            R = math.sqrt(self.len_mass_c**2 + (1 / math.tan(tetta))**2 * self.len_mass_c**2)
-            delta_th = L / R
+            R = math.sqrt(self.len_mass_c**2 + (1 / math.tan(tetta))**2 * self.len_base_car**2)
+            delta_th =  L / R
+            if tetta > 0:
+                delta_th *= -1
         else:
             delta_th = 0
-        delta_x = L * math.cos(tetta)
-        delta_y = L * math.sin(tetta) 
+        delta_x = L * math.cos(self.th)
+        delta_y = L * math.sin(self.th) 
         self.x += delta_x
         self.y += delta_y
         self.th += delta_th
@@ -116,18 +114,24 @@ class OdomCar():
 
 
     def angle_rul(self): #solution angle whell 
-        try:  # load data angle
+    #
+        try:  # loading data on angle values ​​occurs from a file
             path = '/home/nik/catkin_ws/src/auto_car/src/test.json'
             with open(path, 'r', encoding='utf-8') as f:
                 data_j = json.load(f)
+                change1 = []
+                change2 = []
                 for i in range(360):
-                    if i <= 90:
-                        self.angle_whell.append(data_j[i]['%d' % i])  
+                    if i < 90:
+                        change2.append(data_j[i]['%d' % i])  
                     if i >= 270 and i < 360:
-                        self.angle_whell.append(data_j[i]['%d' % i])         
+                        change1.append(data_j[i]['%d' % i])     
+                    self.angle_whell = change1 + change2
+                    #print(len(self.angle_whell))
+                    #print(self.angle_whell)    
             
-        except:
-            print('does not open file')
+        except: 
+            print('it is not possible to open the file')
       
         
 
