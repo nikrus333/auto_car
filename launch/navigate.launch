@@ -1,13 +1,16 @@
 <launch>
     <!-- Map server -->
-    <arg name="map_file" default="$(find auto_car)/maps/my-map-4.yaml"/>
-    
-    <node pkg="map_server" name="map_server"  type="map_server" args="$(arg map_file)" />
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find auto_car)/maps/willow-full.pgm 0.1" respawn="false" />
+
+   <!-- <node pkg="map_server" name="map_server"  type="map_server" args="$(arg map_file)" />   -->
+    <include file="$(find auto_car)/move_base_config/move_base.xml"/>
 
     <!-- AMCL used for localization -->
-    <include file="$(find auto_car)/launch/amcl.launch" />
+      <!--   <include file="$(find auto_car)/launch/amcl.launch" /> -->
+    <include file="$(find auto_car)/move_base_config/amcl_node.xml"/>
+    <include file="$(find auto_car)/move_base_config/slam_gmapping.xml"/>  
 
     <!-- Calls navigation stack packages for compatible Linorobot base -->
     <!-- Takes reference from env variable LINOBASE. ie. export LINOBASE=2wd -->
-    <include file="$(find auto_car)/launch/move_base/move_base_$(env LINOBASE).launch" />
+    <!--  <include file="$(find auto_car)/launch/move_base/move_base_$(env LINOBASE).launch" />  -->
 </launch>

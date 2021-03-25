@@ -30,9 +30,7 @@ class OdomCar():
         self.len_base_car = 0.17 * scale  # lenght auto_car
         self.len_mass_c = 0.08 * scale
         self.radius_whell = 0.0325 * scale
-        self.len_laser = 0.091 * scale
-        self.len_tyaga = 0.059 * scale
-        self.len_r_flan = 0.008 * scale
+        self.len_laser = 0.091 * scale #delite
         self.x = 0
         self.y = 0
         self.th = 0
@@ -52,8 +50,7 @@ class OdomCar():
     def odom_cam(self,data):  
         self.pos[0] = data.position[0]
         self.pos[1] = data.position[1]
-        #print(data.position[1] - 3.14159265359)
-
+     
         # arduino car
         n1 = 10
         n2 = 24
@@ -76,9 +73,9 @@ class OdomCar():
             alfa = (self.pos[1] - 1 * self.pi) * 180 / self.pi
         if alfa < 0:
             alfa = 0
-        print('alfa', alfa)
+        #print('alfa', alfa)
         tetta = (self.angle_whell[int(alfa)][0] - self.angle_whell[int(alfa)][1]) / 2 
-        print('tetta', tetta)
+        #print('tetta', tetta)
         tetta = tetta * self.pi / 180 * -1
         #
         if tetta !=0: 
@@ -114,7 +111,6 @@ class OdomCar():
 
 
     def angle_rul(self): #solution angle whell 
-    #
         try:  # loading data on angle values ​​occurs from a file
             path = '/home/nik/catkin_ws/src/auto_car/src/test.json'
             with open(path, 'r', encoding='utf-8') as f:
@@ -133,9 +129,7 @@ class OdomCar():
         except: 
             print('it is not possible to open the file')
       
-        
-
-if __name__ == "__main__":
+def main():
     car = OdomCar()
     car.angle_rul()
     stored_exception=None
@@ -146,4 +140,7 @@ if __name__ == "__main__":
                 print('game over')
                 break
         except KeyboardInterrupt:
-            stored_exception=sys.exc_info()
+            stored_exception=sys.exc_info()      
+
+if __name__ == "__main__":
+    main()

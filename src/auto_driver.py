@@ -38,9 +38,9 @@ class ContrlMode():
         self.mes = [0, 0]
         
     def keys_input(self,data):
-        vel = 200 * data.axes[1]
+        vel = 100 * data.axes[1]
         pos = data.axes[3]
-        pos = (pos +2) * 2.25
+        pos = (pos * 15)
         self.mes[0] = vel
         self.mes[1] = pos
         print(self.mes[1])
