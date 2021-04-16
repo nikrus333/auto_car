@@ -19,7 +19,7 @@ float target_time_pos = 0;
 float target_time_vel = 0;
 float dir_move = 0;
 static float current_pose[2] = {0.0, 0.0};
-static float target_posse[2] = {0, 0};
+static float target_vel[2] = {0, 0};
 int time_millis[7] = {0,0,0,0,0,0,0};
 void pose_cb(const geometry_msgs::Vector3& pose){//колбэк топика положения подвеса
   target_pose = pose.x;
@@ -80,10 +80,10 @@ void loop() {
    
    speed_data = speed_control();
    joint_state.header.stamp = nh.now();
-   target_posse[0] = speed_data;
-   joint_state.velocity = target_posse;
+   target_vel[0] = speed_data;
+   joint_state.velocity = target_vel;
    joint_state.effort = 0;
-   joint_state.position = current_pose;
+   joint_state.position = target_pose;
    joint_state_pub.publish(&joint_state); 
    
 //  delay(1000);
